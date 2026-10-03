@@ -1,0 +1,30 @@
+.env
+.env.*
+!.env.example
+node_modules/
+dist/
+__pycache__/
+*.pyc
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+
+# LLM keys for voice assistant
+apikey.txt
+
+# logs / local output
+*.log
+logs/
+artifacts/
+
+# sqlite
+*.db
+*.db-shm
+*.db-wal
+
+# editor / tool state
+.vscode/
+.cursor/
