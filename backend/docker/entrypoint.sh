@@ -42,28 +42,42 @@ wait_for_redis() {
 }
 
 run_migrations() {
-    log "running database migrations"
-    python -m alembic upgrade head
+    local alembic_config="${ALEMBIC_CONFIG:-/app/alembic.ini}"
+    if [ -f "${alembic_config}" ]; then
+        log "running database migrations"
+        python -m alembic -c "${alembic_config}" upgrade head
+    else
+        log "skipping migrations: alembic config not found at ${alembic_config}"
+    fi
+}
+
+run_module_if_present() {
+    local module="$1"
+    if python -c "import importlib.util; import sys; sys.exit(0 if importlib.util.find_spec('${module}') else 1)" >/dev/null 2>&1; then
+        python -m "${module}"
+    else
+        log "skipping module ${module}: not found"
+    fi
 }
 
 initialize_vector_db() {
     log "initializing vector database"
-    python -m backend.app.scripts.init_vector_db
+    run_module_if_present "app.scripts.init_vector_db"
 }
 
 warmup_prompts() {
     log "warming up prompt registry"
-    python -m backend.app.scripts.warmup_prompts
+    run_module_if_present "app.scripts.warmup_prompts"
 }
 
 warmup_capabilities() {
     log "warming up capability registry"
-    python -m backend.app.scripts.warmup_capabilities
+    run_module_if_present "app.scripts.warmup_capabilities"
 }
 
 start_server() {
     log "starting uvicorn"
-    uvicorn backend.app.integration.app:app \
+    uvicorn app.integration.app:app \
         --host "${HOST:-0.0.0.0}" \
         --port "${PORT:-8000}" \
         --workers "${UVICORN_WORKERS:-4}" \

@@ -282,11 +282,6 @@ NVIDIA_PRICING: dict[str, ModelPricing] = {
         max_output_tokens=512,
     ),
 }
-        tier=ModelTier.ECONOMY,
-        context_window=200000,
-        max_output_tokens=4096,
-    ),
-}
 
 
 # =============================================================================

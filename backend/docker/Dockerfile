@@ -83,8 +83,8 @@ RUN groupadd --gid 1000 appuser \
 
 COPY --chown=appuser:appuser backend/app/ ${APP_HOME}/app/
 COPY --chown=appuser:appuser requirements.txt ${APP_HOME}/requirements.txt
-COPY --chown=appuser:appuser entrypoint.sh ${APP_HOME}/entrypoint.sh
-COPY --chown=appuser:appuser healthcheck.sh ${APP_HOME}/healthcheck.sh
+COPY --chown=appuser:appuser backend/docker/entrypoint.sh ${APP_HOME}/entrypoint.sh
+COPY --chown=appuser:appuser backend/docker/healthcheck.sh ${APP_HOME}/healthcheck.sh
 
 RUN chmod +x ${APP_HOME}/entrypoint.sh ${APP_HOME}/healthcheck.sh
 
@@ -98,4 +98,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD ["/app/healthcheck.sh"]
 
 ENTRYPOINT ["/app/entrypoint.sh"]
-CMD ["uvicorn", "backend.app.integration.app:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.integration.app:app", "--host", "0.0.0.0", "--port", "8000"]

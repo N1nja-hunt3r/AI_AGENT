@@ -10,6 +10,7 @@ handling.
 from __future__ import annotations
 
 import logging
+import os
 import time
 from contextlib import asynccontextmanager
 from typing import Any, AsyncIterator, Dict, List
@@ -29,7 +30,17 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s [%(nam
 logger = logging.getLogger("app")
 
 APP_START_TIME = time.time()
-ALLOWED_ORIGINS: List[str] = ["*"]
+
+
+def _load_allowed_origins() -> List[str]:
+    raw = os.getenv("CORS_ORIGINS", "")
+    origins = [origin.strip() for origin in raw.split(",") if origin.strip()]
+    if not origins:
+        origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+    if "*" in origins:
+        logger.warning("CORS_ORIGINS contains wildcard '*'; falling back to explicit local origins")
+        return ["http://localhost:5173", "http://127.0.0.1:5173"]
+    return origins
 
 
 @asynccontextmanager
@@ -151,7 +162,7 @@ def create_app() -> FastAPI:
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=ALLOWED_ORIGINS,
+        allow_origins=_load_allowed_origins(),
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
